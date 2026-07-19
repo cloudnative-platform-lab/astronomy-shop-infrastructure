@@ -1,0 +1,34 @@
+﻿# Platform ownership and review routing.
+
+* @platform-team
+
+/environments/dev/ @platform-team
+/environments/staging/ @platform-team
+/environments/prod/ @platform-team @security-team
+
+/modules/networking/ @network-platform-team
+/modules/eks/ @platform-team
+/modules/security/ @security-team
+/modules/kubernetes-security/ @security-team
+/modules/identity/ @security-team
+/modules/cicd/ @platform-team @security-team
+/modules/gitops/ @platform-team
+/modules/data-stores/ @data-platform-team
+/modules/backup/ @platform-team
+/modules/disaster-recovery/ @platform-team
+/modules/governance/ @platform-team @security-team
+/modules/observability/ @platform-team
+
+/.github/ @platform-team
+/SECURITY.md @security-team
+/CONTRIBUTING.md @platform-team
+/CHANGELOG.md @platform-team
+/docs/ @platform-team
+/docs/security.md @security-team
+/docs/03-runtime-security-and-scaling.md @security-team
+/docs/04-proof-operations-and-troubleshooting.md @platform-team @security-team
+/docs/04-proof-operations-and-troubleshooting.md @platform-team
+/docs/decisions/ @platform-team
+/docs/runbooks/ @platform-team
+
+

@@ -1,0 +1,15 @@
+output "karpenter_controller_role_arn" { value = module.karpenter.controller_role_arn }
+output "aws_load_balancer_controller_role_arn" { value = try(module.ingress[0].aws_load_balancer_controller_role_arn, null) }
+output "external_dns_role_arn" { value = try(module.ingress[0].external_dns_role_arn, null) }
+output "cert_manager_role_arn" { value = try(module.ingress[0].cert_manager_role_arn, null) }
+output "application_load_balancer_hostname" { value = try(module.ingress[0].application_load_balancer_hostname, null) }
+output "argo_rollouts_release" { value = module.argo_rollouts.helm_release_name }
+output "kubernetes_security_namespaces" { value = try(module.kubernetes_security[0].managed_namespaces, []) }
+output "workload_namespace" { value = try(module.workload_foundation[0].namespace, null) }
+output "argocd_root_application_name" { value = try(module.gitops[0].root_application_name, null) }
+output "argocd_root_application_path" { value = try(module.gitops[0].root_application_path, null) }
+output "alerts_topic_arn" { value = module.observability.alerts_topic_arn }
+output "cloudwatch_dashboard_name" { value = try(module.cloudwatch[0].dashboard_name, null) }
+output "velero_bucket_name" { value = try(module.velero[0].bucket_name, null) }
+output "finops_budget_name" { value = try(module.finops[0].budget_name, null) }
+output "kubecost_release_name" { value = try(module.finops[0].kubecost_release_name, null) }

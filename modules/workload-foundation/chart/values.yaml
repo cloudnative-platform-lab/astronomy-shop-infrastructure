@@ -1,0 +1,6 @@
+awsRegion: ap-south-1
+namespace: astronomy-shop
+targetSecretName: astronomy-shop-runtime
+databaseSecretName: astronomy-shop-database
+runtimeSecretKey: ""
+databaseSecretKey: ""

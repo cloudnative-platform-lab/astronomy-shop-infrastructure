@@ -1,0 +1,8 @@
+output "aws_load_balancer_controller_release" { value = helm_release.aws_load_balancer_controller.name }
+output "aws_load_balancer_controller_role_arn" { value = aws_iam_role.aws_load_balancer_controller.arn }
+output "external_dns_role_arn" { value = aws_iam_role.external_dns.arn }
+output "cert_manager_role_arn" { value = aws_iam_role.cert_manager.arn }
+output "application_ingress_name" { value = try(kubernetes_ingress_v1.application[0].metadata[0].name, null) }
+output "application_hostname" { value = var.create_application_ingress ? var.application_hostname : null }
+output "application_load_balancer_hostname" { value = try(kubernetes_ingress_v1.application[0].status[0].load_balancer[0].ingress[0].hostname, null) }
+output "cluster_issuer_name" { value = try(helm_release.cluster_issuer[0].name, null) }

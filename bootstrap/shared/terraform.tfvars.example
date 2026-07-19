@@ -1,0 +1,5 @@
+aws_region                    = "ap-south-1"
+github_org                    = "Prasanna-1010-AWS"
+github_app_repository         = "astronomy-shop-app"
+create_github_oidc_provider   = true
+github_oidc_provider_arn      = null

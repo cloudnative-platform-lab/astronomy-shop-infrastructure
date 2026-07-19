@@ -1,0 +1,8 @@
+clusterName: ""
+nodeRoleName: ""
+allowedInstanceTypes: []
+capacityTypes:
+  - on-demand
+  - spot
+architecture: amd64
+cpuLimit: "100"

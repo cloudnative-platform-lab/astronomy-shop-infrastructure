@@ -1,0 +1,6 @@
+apiVersion: v2
+name: astronomy-shop-cluster-issuer
+description: cert-manager ACME ClusterIssuer for Astronomy Shop
+type: application
+version: 0.1.0
+appVersion: "1.0"
