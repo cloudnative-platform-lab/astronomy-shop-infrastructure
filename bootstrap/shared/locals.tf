@@ -5,12 +5,14 @@ locals {
     "cart",
     "checkout",
     "currency",
+    "email",
     "frontend",
     "frontend-proxy",
     "image-provider",
     "payment",
     "product-catalog",
-    "recommendation"
+    "recommendation",
+    "shipping"
   ]
 
   common_tags = {
