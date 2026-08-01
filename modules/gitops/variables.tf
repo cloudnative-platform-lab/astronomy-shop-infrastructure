@@ -61,6 +61,14 @@ variable "repository_url" {
   type        = string
 }
 
+variable "repository_ssh_private_key" {
+  description = "Optional private SSH deploy key used by Argo CD to read a GitOps repository configured with an SSH URL."
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+}
+
 variable "target_revision" {
   description = "Git revision, branch, or tag watched by the root Argo CD Application."
   type        = string

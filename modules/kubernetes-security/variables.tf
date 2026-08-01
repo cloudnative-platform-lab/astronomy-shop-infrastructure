@@ -62,7 +62,7 @@ variable "cosign_issuer" {
 
 variable "cosign_subject_regexp" {
   type    = string
-  default = "https://github.com/Prasanna-1010-AWS/astronomy-shop-app/.github/workflows/.+@refs/heads/main"
+  default = "https://github.com/cloudnative-platform-lab/astronomy-shop-app/.github/workflows/.+@refs/heads/main"
 }
 
 variable "falco_namespace" {

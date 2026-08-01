@@ -2,6 +2,8 @@ data "aws_iam_openid_connect_provider" "this" {
   arn = var.oidc_provider_arn
 }
 
+data "aws_caller_identity" "current" {}
+
 locals {
   oidc_provider = replace(data.aws_iam_openid_connect_provider.this.url, "https://", "")
 
@@ -19,6 +21,88 @@ locals {
       name      = "cert-manager"
     }
   }
+}
+
+resource "aws_s3_bucket" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = "${var.name}-${var.environment}-${data.aws_caller_identity.current.account_id}-alb-logs"
+  tags   = var.tags
+}
+
+resource "aws_s3_bucket_public_access_block" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket                  = aws_s3_bucket.alb_access_logs[0].id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+
+  rule {
+    id     = "alb-access-log-retention"
+    status = "Enabled"
+
+    filter { prefix = "" }
+
+    expiration {
+      days = var.alb_access_logs_retention_days
+    }
+  }
+}
+
+data "aws_iam_policy_document" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  statement {
+    sid = "AllowElasticLoadBalancingLogDelivery"
+
+    principals {
+      type        = "Service"
+      identifiers = ["logdelivery.elasticloadbalancing.amazonaws.com"]
+    }
+
+    actions = ["s3:PutObject"]
+
+    resources = [
+      "${aws_s3_bucket.alb_access_logs[0].arn}/${var.alb_access_logs_prefix}/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
+    ]
+  }
+}
+
+resource "aws_s3_bucket_policy" "alb_access_logs" {
+  count = var.enable_alb_access_logs ? 1 : 0
+
+  bucket = aws_s3_bucket.alb_access_logs[0].id
+  policy = data.aws_iam_policy_document.alb_access_logs[0].json
 }
 
 data "aws_iam_policy_document" "irsa_assume_role" {
@@ -197,6 +281,7 @@ resource "helm_release" "aws_load_balancer_controller" {
   version          = var.aws_load_balancer_controller_chart_version
   namespace        = "kube-system"
   create_namespace = false
+  wait             = true
   timeout          = 900
 
   set {
@@ -261,7 +346,10 @@ resource "helm_release" "external_dns" {
     value = aws_iam_role.external_dns.arn
   }
 
-  depends_on = [aws_iam_role_policy_attachment.external_dns]
+  depends_on = [
+    aws_iam_role_policy_attachment.external_dns,
+    helm_release.aws_load_balancer_controller,
+  ]
 }
 
 resource "helm_release" "cert_manager" {
@@ -271,7 +359,7 @@ resource "helm_release" "cert_manager" {
   version          = var.cert_manager_chart_version
   namespace        = "cert-manager"
   create_namespace = true
-  wait             = false
+  wait             = true
   timeout          = 900
 
   set {
@@ -294,7 +382,10 @@ resource "helm_release" "cert_manager" {
     value = aws_iam_role.cert_manager.arn
   }
 
-  depends_on = [aws_iam_role_policy_attachment.cert_manager]
+  depends_on = [
+    aws_iam_role_policy_attachment.cert_manager,
+    helm_release.aws_load_balancer_controller,
+  ]
 }
 
 resource "helm_release" "cluster_issuer" {

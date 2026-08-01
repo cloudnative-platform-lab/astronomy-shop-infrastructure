@@ -1,3 +1,16 @@
+data "aws_caller_identity" "current" {}
+
+data "aws_iam_session_context" "current" {
+  arn = data.aws_caller_identity.current.arn
+}
+
+locals {
+  cluster_admin_principal_arns = distinct(concat(
+    var.admin_role_arns,
+    [data.aws_iam_session_context.current.issuer_arn]
+  ))
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -8,10 +21,10 @@ module "eks" {
   cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
   cluster_endpoint_private_access      = true
 
-  enable_cluster_creator_admin_permissions = true
+  enable_cluster_creator_admin_permissions = false
 
   access_entries = {
-    for admin_role_arn in var.admin_role_arns : replace(replace(replace(admin_role_arn, ":", "_"), "/", "_"), "-", "_") => {
+    for admin_role_arn in local.cluster_admin_principal_arns : replace(replace(replace(admin_role_arn, ":", "_"), "/", "_"), "-", "_") => {
       principal_arn = admin_role_arn
       type          = "STANDARD"
 

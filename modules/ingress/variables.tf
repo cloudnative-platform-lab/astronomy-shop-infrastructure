@@ -39,6 +39,18 @@ variable "alb_healthcheck_path" {
   type    = string
   default = "/"
 }
+variable "enable_alb_access_logs" {
+  type    = bool
+  default = false
+}
+variable "alb_access_logs_prefix" {
+  type    = string
+  default = "alb"
+}
+variable "alb_access_logs_retention_days" {
+  type    = number
+  default = 30
+}
 variable "aws_load_balancer_controller_chart_version" {
   type    = string
   default = "1.8.1"

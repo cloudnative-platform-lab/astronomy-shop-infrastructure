@@ -189,6 +189,9 @@ resource "helm_release" "opentelemetry_collector" {
   values = [
     yamlencode({
       mode = "deployment"
+      image = {
+        repository = "otel/opentelemetry-collector-k8s"
+      }
       config = {
         receivers = {
           otlp = {

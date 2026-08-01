@@ -6,3 +6,4 @@ output "application_ingress_name" { value = try(kubernetes_ingress_v1.applicatio
 output "application_hostname" { value = var.create_application_ingress ? var.application_hostname : null }
 output "application_load_balancer_hostname" { value = try(kubernetes_ingress_v1.application[0].status[0].load_balancer[0].ingress[0].hostname, null) }
 output "cluster_issuer_name" { value = try(helm_release.cluster_issuer[0].name, null) }
+output "alb_access_logs_bucket_name" { value = try(aws_s3_bucket.alb_access_logs[0].bucket, null) }

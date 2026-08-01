@@ -24,12 +24,37 @@ resource "helm_release" "kubecost" {
   name             = "kubecost"
   repository       = "https://kubecost.github.io/cost-analyzer/"
   chart            = "cost-analyzer"
-  version          = var.kubecost_chart_version
+  version          = coalesce(var.kubecost_chart_version, "2.8.7")
   namespace        = var.kubecost_namespace
   create_namespace = true
   wait             = true
   timeout          = var.kubecost_helm_timeout
-  values           = var.kubecost_values
+  values = concat(var.kubecost_values, [
+    yamlencode({
+      persistentVolume = {
+        enabled      = var.enable_persistence
+        storageClass = var.enable_persistence ? "gp3" : null
+      }
+      prometheus = {
+        server = {
+          persistentVolume = {
+            enabled      = var.enable_persistence
+            storageClass = var.enable_persistence ? "gp3" : null
+          }
+        }
+      }
+    })
+  ])
+
+  set {
+    name  = "global.clusterId"
+    value = "${var.name}-${var.environment}"
+  }
+
+  set {
+    name  = "prometheus.server.global.external_labels.cluster_id"
+    value = "${var.name}-${var.environment}"
+  }
 
   set {
     name  = "kubecostProductConfigs.clusterName"

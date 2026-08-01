@@ -8,6 +8,11 @@ variable "enable_kubecost" {
   default = true
 }
 
+variable "enable_persistence" {
+  type    = bool
+  default = false
+}
+
 variable "kubecost_namespace" {
   type    = string
   default = "kubecost"
@@ -25,7 +30,7 @@ variable "kubecost_values" {
 
 variable "kubecost_helm_timeout" {
   type    = number
-  default = 600
+  default = 1800
 }
 
 variable "tags" {

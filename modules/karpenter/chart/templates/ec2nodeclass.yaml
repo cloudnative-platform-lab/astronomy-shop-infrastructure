@@ -7,11 +7,11 @@ spec:
     - alias: al2023@latest
   role: {{ .Values.nodeRoleName | quote }}
   subnetSelectorTerms:
-    - tags:
-        karpenter.sh/discovery: {{ .Values.clusterName | quote }}
+    {{- range .Values.privateSubnetIds }}
+    - id: {{ . | quote }}
+    {{- end }}
   securityGroupSelectorTerms:
-    - tags:
-        karpenter.sh/discovery: {{ .Values.clusterName | quote }}
+    - id: {{ .Values.nodeSecurityGroupId | quote }}
   tags:
     Name: {{ printf "%s-karpenter" .Values.clusterName | quote }}
     ManagedBy: Karpenter

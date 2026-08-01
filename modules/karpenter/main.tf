@@ -53,7 +53,8 @@ resource "helm_release" "controller" {
   depends_on = [
     aws_ec2_tag.subnet_discovery,
     aws_ec2_tag.security_group_discovery,
-    aws_iam_role_policy.instance_type_guardrail
+    aws_iam_role_policy.controller_instance_profile_discovery,
+    aws_iam_role_policy.controller_launch_permissions
   ]
 }
 
@@ -70,6 +71,8 @@ resource "helm_release" "provisioning" {
     yamlencode({
       clusterName          = var.cluster_name
       nodeRoleName         = module.karpenter[0].node_iam_role_name
+      privateSubnetIds     = var.private_subnet_ids
+      nodeSecurityGroupId  = var.node_security_group_id
       allowedInstanceTypes = var.allowed_instance_types
       capacityTypes        = var.capacity_types
       architecture         = var.architecture
@@ -94,25 +97,52 @@ resource "aws_ec2_tag" "security_group_discovery" {
   value       = var.cluster_name
 }
 
-resource "aws_iam_role_policy" "instance_type_guardrail" {
+resource "aws_iam_role_policy" "controller_instance_profile_discovery" {
   count = var.enabled ? 1 : 0
 
-  name = "${var.name}-${var.environment}-karpenter-instance-type-guardrail"
+  name = "${var.name}-${var.environment}-karpenter-instance-profile-discovery"
   role = module.karpenter[0].iam_role_name
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid      = "DenyUnapprovedInstanceTypes"
-        Effect   = "Deny"
-        Action   = "ec2:RunInstances"
+        Sid      = "AllowInstanceProfileDiscovery"
+        Effect   = "Allow"
+        Action   = "iam:ListInstanceProfiles"
         Resource = "*"
-        Condition = {
-          StringNotEquals = {
-            "ec2:InstanceType" = var.allowed_instance_types
-          }
-        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "controller_launch_permissions" {
+  count = var.enabled ? 1 : 0
+
+  name = "${var.name}-${var.environment}-karpenter-launch-permissions"
+  role = module.karpenter[0].iam_role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowKarpenterEc2LaunchOperations"
+        Effect = "Allow"
+        Action = [
+          "ec2:RunInstances",
+          "ec2:CreateFleet",
+          "ec2:CreateLaunchTemplate",
+          "ec2:CreateTags",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeImages",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeInstances",
+          "ec2:DescribeLaunchTemplates",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSpotPriceHistory",
+          "ec2:DescribeSubnets"
+        ]
+        Resource = "*"
       }
     ]
   })
