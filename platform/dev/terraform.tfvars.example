@@ -14,7 +14,6 @@ cert_manager_email = ""
 enable_karpenter = false
 enable_ingress = false
 enable_argo_rollouts = true
-enable_istio = false
 enable_kubernetes_security = true
 enable_workload_foundation = true
 enable_external_secrets = true

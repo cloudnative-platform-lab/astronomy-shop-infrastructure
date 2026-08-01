@@ -38,14 +38,6 @@ module "argo_rollouts" {
   enabled = var.enable_argo_rollouts
 }
 
-module "istio" {
-  source                = "../../modules/istio"
-  enabled               = var.enable_istio
-  application_namespace = local.effective_app_namespace
-
-  depends_on = [module.kubernetes_security]
-}
-
 module "kubernetes_security" {
   count                            = var.enable_kubernetes_security ? 1 : 0
   source                           = "../../modules/kubernetes-security"
@@ -93,7 +85,7 @@ module "gitops" {
   install_argocd          = var.enable_gitops
   create_root_application = var.create_gitops_root_application
   tags                    = local.common_tags
-  depends_on              = [module.karpenter, module.argo_rollouts, module.istio, module.observability, module.workload_foundation]
+  depends_on              = [module.karpenter, module.argo_rollouts, module.observability, module.workload_foundation]
 }
 
 module "observability" {
