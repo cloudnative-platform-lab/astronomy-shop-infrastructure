@@ -3,6 +3,7 @@ output "aws_load_balancer_controller_role_arn" { value = try(module.ingress[0].a
 output "external_dns_role_arn" { value = try(module.ingress[0].external_dns_role_arn, null) }
 output "cert_manager_role_arn" { value = try(module.ingress[0].cert_manager_role_arn, null) }
 output "application_load_balancer_hostname" { value = try(module.ingress[0].application_load_balancer_hostname, null) }
+output "alb_access_logs_bucket_name" { value = try(module.ingress[0].alb_access_logs_bucket_name, null) }
 output "argo_rollouts_release" { value = module.argo_rollouts.helm_release_name }
 output "kubernetes_security_namespaces" { value = try(module.kubernetes_security[0].managed_namespaces, []) }
 output "workload_namespace" { value = try(module.workload_foundation[0].namespace, null) }

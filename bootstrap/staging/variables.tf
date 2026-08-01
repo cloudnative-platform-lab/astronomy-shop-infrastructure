@@ -26,17 +26,40 @@ variable "create_certificate_validation_records" {
   type    = bool
   default = false
 }
+variable "manage_edge_certificates" {
+  description = "Whether this bootstrap state creates the regional ALB and us-east-1 CloudFront certificates."
+  type        = bool
+  default     = false
+}
 variable "alb_dns_name" {
   type    = string
   default = ""
+}
+variable "alb_hosted_zone_id" {
+  type    = string
+  default = ""
+}
+variable "edge_origin_domain_name" {
+  type    = string
+  default = ""
+}
+variable "edge_manage_origin_dns" {
+  description = "Set true only when Terraform, not ExternalDNS, owns the CloudFront origin hostname."
+  type        = bool
+  default     = false
 }
 variable "enable_edge" {
   type    = bool
   default = false
 }
+variable "enable_edge_public_dns_cutover" {
+  description = "Allow Terraform to replace the public DNS record with CloudFront after validation. Keep false while preparing and testing edge."
+  type        = bool
+  default     = false
+}
 variable "github_org" {
   type    = string
-  default = "Prasanna-1010-AWS"
+  default = "cloudnative-platform-lab"
 }
 variable "github_repo" {
   type    = string
@@ -68,12 +91,7 @@ variable "eks_endpoint_public_access" {
 }
 variable "eks_endpoint_public_access_cidrs" {
   type        = list(string)
-  description = "Trusted public CIDRs allowed to reach the EKS API. Never use 0.0.0.0/0 outside development."
-
-  validation {
-    condition     = !contains(var.eks_endpoint_public_access_cidrs, "0.0.0.0/0")
-    error_message = "Staging EKS API access must be restricted to trusted CIDRs."
-  }
+  description = "Public CIDRs allowed to reach the staging EKS API. Personal learning environments may use 0.0.0.0/0 when home ISP addresses change frequently."
 }
 variable "enable_flow_logs" {
   type    = bool

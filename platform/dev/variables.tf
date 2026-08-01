@@ -2,6 +2,11 @@ variable "aws_region" {
   type    = string
   default = "ap-south-1"
 }
+variable "aws_profile" {
+  type     = string
+  default  = null
+  nullable = true
+}
 variable "bootstrap_state_bucket" {
   type = string
 }
@@ -15,7 +20,7 @@ variable "bootstrap_state_region" {
 }
 variable "github_org" {
   type    = string
-  default = "Prasanna-1010-AWS"
+  default = "cloudnative-platform-lab"
 }
 variable "github_repo" {
   type    = string
@@ -23,7 +28,11 @@ variable "github_repo" {
 }
 variable "gitops_repository_url" {
   type    = string
-  default = "git@github.com:Prasanna-1010-AWS/astronomy-shop-gitops.git"
+  default = "git@github.com:cloudnative-platform-lab/astronomy-shop-gitops.git"
+}
+variable "gitops_repository_ssh_private_key_path" {
+  type    = string
+  default = ""
 }
 variable "alert_email" {
   type    = string
@@ -46,6 +55,10 @@ variable "enable_ingress" {
   default = false
 }
 variable "enable_argo_rollouts" {
+  type    = bool
+  default = false
+}
+variable "enable_istio" {
   type    = bool
   default = false
 }
@@ -84,6 +97,18 @@ variable "alb_certificate_arn" {
 variable "alb_waf_acl_arn" {
   type    = string
   default = ""
+}
+variable "enable_alb_access_logs" {
+  type    = bool
+  default = false
+}
+variable "alb_access_logs_prefix" {
+  type    = string
+  default = "alb"
+}
+variable "alb_access_logs_retention_days" {
+  type    = number
+  default = 30
 }
 variable "create_cert_manager_cluster_issuer" {
   type    = bool
@@ -159,7 +184,7 @@ variable "signed_image_repository_patterns" {
 }
 variable "cosign_subject_regexp" {
   type    = string
-  default = "https://github.com/Prasanna-1010-AWS/astronomy-shop-app/.github/workflows/.+@refs/heads/main"
+  default = "https://github.com/cloudnative-platform-lab/astronomy-shop-app/.github/workflows/.+@refs/heads/main"
 }
 variable "create_gitops_root_application" {
   type    = bool

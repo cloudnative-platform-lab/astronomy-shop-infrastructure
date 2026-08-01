@@ -24,6 +24,7 @@ output "dr_replica_bucket_name" { value = module.disaster_recovery.replica_bucke
 output "dr_region" { value = var.dr_region }
 output "dr_backup_vault_arn" { value = module.disaster_recovery.backup_vault_arn }
 output "cloudfront_domain_name" { value = try(module.edge[0].cloudfront_domain_name, null) }
+output "cloudfront_distribution_id" { value = try(module.edge[0].cloudfront_distribution_id, null) }
 output "cloudfront_certificate_arn" { value = module.certificates.certificate_arn }
 output "alb_certificate_arn" { value = module.alb_certificates.certificate_arn }
 output "cloudfront_hosted_zone_id" { value = try(module.edge[0].cloudfront_hosted_zone_id, null) }

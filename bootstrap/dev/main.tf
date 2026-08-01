@@ -47,10 +47,10 @@ module "eks" {
   private_subnet_ids                   = var.enable_nat_gateway ? module.networking.private_subnet_ids : module.networking.public_subnet_ids
   cluster_endpoint_public_access       = var.eks_endpoint_public_access
   cluster_endpoint_public_access_cidrs = var.eks_endpoint_public_access_cidrs
-  node_instance_types                  = ["t3.small"]
-  node_min_size                        = 1
-  node_desired_size                    = 1
-  node_max_size                        = 1
+  node_instance_types                  = var.eks_node_instance_types
+  node_min_size                        = var.eks_node_min_size
+  node_desired_size                    = var.eks_node_desired_size
+  node_max_size                        = var.eks_node_max_size
   cluster_enabled_log_types            = []
   enable_ebs_csi_driver                = var.enable_ebs_csi_driver
   enable_cloudwatch_observability      = var.enable_cloudwatch_observability
@@ -108,8 +108,8 @@ module "certificates" {
   providers                 = { aws = aws.us_east_1 }
   name                      = local.project
   environment               = local.environment
-  domain_name               = var.domain_name
-  subject_alternative_names = var.certificate_subject_alternative_names
+  domain_name               = var.manage_edge_certificates ? var.domain_name : ""
+  subject_alternative_names = var.manage_edge_certificates ? var.certificate_subject_alternative_names : []
   route53_zone_id           = var.route53_zone_id
   create_validation_records = false
   validation_record_fqdns   = module.alb_certificates.validation_record_fqdns
@@ -120,8 +120,8 @@ module "alb_certificates" {
   source                    = "../../modules/certificates"
   name                      = local.project
   environment               = local.environment
-  domain_name               = var.domain_name
-  subject_alternative_names = var.certificate_subject_alternative_names
+  domain_name               = var.manage_edge_certificates ? var.domain_name : ""
+  subject_alternative_names = var.manage_edge_certificates ? var.certificate_subject_alternative_names : []
   route53_zone_id           = var.route53_zone_id
   create_validation_records = var.create_certificate_validation_records
   tags                      = local.common_tags
@@ -156,13 +156,17 @@ module "edge" {
   environment          = local.environment
   domain_name          = var.domain_name
   alb_dns_name         = var.alb_dns_name
+  alb_hosted_zone_id   = var.alb_hosted_zone_id
+  origin_domain_name   = var.edge_origin_domain_name
+  route53_zone_id      = var.route53_zone_id
+  manage_origin_dns    = var.edge_manage_origin_dns
   certificate_arn      = var.cloudfront_certificate_arn != "" ? var.cloudfront_certificate_arn : (module.certificates.certificate_arn != null ? module.certificates.certificate_arn : "")
   rate_limit_per_5_min = 10000
   tags                 = local.common_tags
 }
 
 module "route53" {
-  count                     = var.enable_route53 && var.enable_edge ? 1 : 0
+  count                     = var.enable_route53 && var.enable_edge && var.enable_edge_public_dns_cutover ? 1 : 0
   source                    = "../../modules/route53"
   name                      = local.project
   environment               = local.environment

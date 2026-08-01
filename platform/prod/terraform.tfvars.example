@@ -1,6 +1,8 @@
-bootstrap_state_bucket = "REPLACE_WITH_YOUR_TERRAFORM_STATE_BUCKET"
+# After applying bootstrap/remote-state, copy its `state_bucket_name` output here.
+bootstrap_state_bucket = "replace-with-bootstrap-remote-state-output"
 bootstrap_state_key = "astronomy-shop/bootstrap/prod/terraform.tfstate"
 bootstrap_state_region = "ap-south-1"
+gitops_repository_ssh_private_key_path = "~/.ssh/argocd_astronomy_shop_gitops"
 alert_email = "platform-alerts@example.com"
 create_application_ingress = false
 application_hostname = "shop.example.com"
@@ -9,12 +11,13 @@ alb_waf_acl_arn = ""
 create_cert_manager_cluster_issuer = false
 cert_manager_email = ""
 enable_karpenter = true
-enable_ingress = false
+enable_ingress = true
 enable_argo_rollouts = true
+enable_istio = true
 enable_kubernetes_security = true
 enable_workload_foundation = true
 enable_external_secrets = true
-enable_gitops = false
+enable_gitops = true
 enable_observability = true
 enable_metrics_server = true
 enable_alertmanager = true
@@ -29,5 +32,7 @@ enable_kubecost = true
 enable_kyverno = true
 enable_falco = true
 enable_signed_image_policy = false
-create_gitops_root_application = true
+# Keep false for the first platform apply. Change to true only after Argo CD
+# has read-only access to the GitOps repository.
+create_gitops_root_application = false
 cloudwatch_log_retention_days = 90

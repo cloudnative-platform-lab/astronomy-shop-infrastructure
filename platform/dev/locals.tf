@@ -3,7 +3,7 @@ locals {
   environment             = "dev"
   app_namespace           = local.environment
   effective_app_namespace = var.app_namespace != "" ? var.app_namespace : local.app_namespace
-  services                = ["cart", "checkout", "currency", "frontend", "frontend-proxy", "image-provider", "product-catalog", "payment", "recommendation"]
+  services                = ["cart", "checkout", "currency", "email", "frontend", "frontend-proxy", "image-provider", "payment", "product-catalog", "recommendation", "shipping"]
   kubernetes_namespace_labels = {
     "app.kubernetes.io/name"       = local.project
     "app.kubernetes.io/part-of"    = local.project

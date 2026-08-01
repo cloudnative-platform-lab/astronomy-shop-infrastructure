@@ -28,6 +28,9 @@ module "ingress" {
   application_service_port   = 8080
   alb_certificate_arn        = var.alb_certificate_arn != "" ? var.alb_certificate_arn : try(data.terraform_remote_state.bootstrap.outputs.alb_certificate_arn, "")
   alb_waf_acl_arn            = var.alb_waf_acl_arn
+  enable_alb_access_logs     = var.enable_alb_access_logs
+  alb_access_logs_prefix     = var.alb_access_logs_prefix
+  alb_access_logs_retention_days = var.alb_access_logs_retention_days
   create_cluster_issuer      = var.create_cert_manager_cluster_issuer
   cluster_issuer_email       = var.cert_manager_email != "" ? var.cert_manager_email : var.alert_email
   tags                       = local.common_tags
@@ -36,6 +39,14 @@ module "ingress" {
 module "argo_rollouts" {
   source  = "../../modules/argo-rollouts"
   enabled = var.enable_argo_rollouts
+}
+
+module "istio" {
+  source                = "../../modules/istio"
+  enabled               = var.enable_istio
+  application_namespace = local.effective_app_namespace
+
+  depends_on = [module.kubernetes_security]
 }
 
 module "kubernetes_security" {
@@ -79,12 +90,13 @@ module "gitops" {
   name                    = local.project
   environment             = local.environment
   repository_url          = var.gitops_repository_url
+  repository_ssh_private_key = var.gitops_repository_ssh_private_key_path != "" && fileexists(pathexpand(var.gitops_repository_ssh_private_key_path)) ? file(pathexpand(var.gitops_repository_ssh_private_key_path)) : null
   root_application_path   = "argocd/appsets/${local.environment}"
   target_revision         = "main"
   install_argocd          = var.enable_gitops
   create_root_application = var.create_gitops_root_application
   tags                    = local.common_tags
-  depends_on              = [module.karpenter, module.argo_rollouts, module.observability, module.workload_foundation]
+  depends_on              = [module.karpenter, module.argo_rollouts, module.istio, module.observability, module.workload_foundation]
 }
 
 module "observability" {
@@ -98,8 +110,10 @@ module "observability" {
   enable_loki                    = var.enable_loki
   enable_opentelemetry_collector = var.enable_opentelemetry_collector
   enable_tempo                   = var.enable_tempo
-  enable_persistence             = var.enable_observability_persistence
-  tags                           = local.common_tags
+    enable_persistence             = var.enable_observability_persistence
+    tags                           = local.common_tags
+
+  depends_on = [module.ingress]
 }
 
 module "cloudwatch" {
@@ -132,8 +146,10 @@ module "finops" {
   monthly_budget_usd     = 150
   alert_email            = var.alert_email
   enable_kubecost        = var.enable_kubecost
+  enable_persistence     = var.enable_observability_persistence
   kubecost_chart_version = var.kubecost_chart_version
   kubecost_values        = var.kubecost_values
   tags                   = local.common_tags
+  depends_on             = [module.observability]
 }
 

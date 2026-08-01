@@ -6,7 +6,7 @@ This policy covers the Terraform platform code, GitOps bootstrap structure, docu
 
 The upstream application source code lives separately:
 
-`https://github.com/Prasanna-1010-AWS/astronomy-shop-app`
+`https://github.com/cloudnative-platform-lab/astronomy-shop-app`
 
 ## Reporting a Vulnerability
 
