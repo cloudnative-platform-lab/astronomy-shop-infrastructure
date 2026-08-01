@@ -5,7 +5,8 @@ variable "aws_region" {
 
 variable "state_bucket_name" {
   type        = string
-  description = "Globally unique S3 bucket name for Terraform state."
+  description = "Optional globally unique S3 bucket name for Terraform state. Leave null to generate an account-based name."
+  default     = null
 }
 
 variable "lock_table_name" {
@@ -49,7 +50,7 @@ variable "tags" {
     ManagedBy     = "Terraform"
     TerraformRoot = "bootstrap/remote-state"
     Repository    = "astronomy-shop-gitops"
-    Owner         = "Prasanna-1010-AWS"
+    Owner         = "cloudnative-platform-lab"
     Region        = "ap-south-1"
     Purpose       = "remote-state"
   }

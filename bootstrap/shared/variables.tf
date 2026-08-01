@@ -5,7 +5,7 @@ variable "aws_region" {
 
 variable "github_org" {
   type    = string
-  default = "Prasanna-1010-AWS"
+  default = "cloudnative-platform-lab"
 }
 
 variable "github_app_repository" {
