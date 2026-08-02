@@ -99,6 +99,25 @@ resource "helm_release" "kube_prometheus_stack" {
           size             = "10Gi"
         }
       }
+      "prometheus-node-exporter" = {
+        affinity = {
+          nodeAffinity = {
+            requiredDuringSchedulingIgnoredDuringExecution = {
+              nodeSelectorTerms = [
+                {
+                  matchExpressions = [
+                    {
+                      key      = "kubernetes.io/os"
+                      operator = "In"
+                      values   = ["linux"]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
     })
   ]
 
