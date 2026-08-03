@@ -119,6 +119,7 @@ resource "helm_release" "loki" {
   values = [
     yamlencode({
       loki = {
+        isDefault = false
         persistence = {
           enabled          = var.enable_persistence
           storageClassName = var.enable_persistence ? "gp3" : null
