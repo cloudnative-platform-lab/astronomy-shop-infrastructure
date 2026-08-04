@@ -39,6 +39,17 @@ variable "alb_healthcheck_path" {
   type    = string
   default = "/"
 }
+variable "application_origin_verification_header_name" {
+  description = "Header name required by the ALB application listener to accept CloudFront-originated traffic."
+  type        = string
+  default     = ""
+}
+variable "application_origin_verification_header_value" {
+  description = "Header value required by the ALB application listener to accept CloudFront-originated traffic."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
 variable "enable_alb_access_logs" {
   type    = bool
   default = false

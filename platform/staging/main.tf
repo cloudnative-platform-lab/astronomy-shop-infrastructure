@@ -28,6 +28,8 @@ module "ingress" {
   application_service_port   = 8080
   alb_certificate_arn        = var.alb_certificate_arn != "" ? var.alb_certificate_arn : try(data.terraform_remote_state.bootstrap.outputs.alb_certificate_arn, "")
   alb_waf_acl_arn            = var.alb_waf_acl_arn
+  application_origin_verification_header_name  = try(data.terraform_remote_state.bootstrap.outputs.edge_origin_verification_header_name, "")
+  application_origin_verification_header_value = try(data.terraform_remote_state.bootstrap.outputs.edge_origin_verification_header_value, "")
   create_cluster_issuer      = var.create_cert_manager_cluster_issuer
   cluster_issuer_email       = var.cert_manager_email != "" ? var.cert_manager_email : var.alert_email
   tags                       = local.common_tags

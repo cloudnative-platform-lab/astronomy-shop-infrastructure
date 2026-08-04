@@ -428,6 +428,17 @@ resource "kubernetes_ingress_v1" "application" {
       },
       var.alb_waf_acl_arn == "" ? {} : {
         "alb.ingress.kubernetes.io/wafv2-acl-arn" = var.alb_waf_acl_arn
+      },
+      var.application_origin_verification_header_name == "" || var.application_origin_verification_header_value == "" ? {} : {
+        "alb.ingress.kubernetes.io/conditions.${var.application_service_name}" = jsonencode([
+          {
+            field = "http-header"
+            httpHeaderConfig = {
+              httpHeaderName = var.application_origin_verification_header_name
+              values         = [var.application_origin_verification_header_value]
+            }
+          }
+        ])
       }
     )
   }

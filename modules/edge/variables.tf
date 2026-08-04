@@ -44,6 +44,17 @@ variable "manage_origin_dns" {
 }
 variable "certificate_arn" { type = string }
 variable "rate_limit_per_5_min" { type = number }
+variable "origin_verification_header_name" {
+  description = "Header CloudFront adds to origin requests; the ALB listener requires it to prevent direct-origin bypass."
+  type        = string
+  default     = "X-Astronomy-Shop-Origin-Verify"
+}
+variable "origin_verification_header_value" {
+  description = "Optional fixed origin-verification value. Leave empty to generate and retain a random value in Terraform state."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
 variable "tags" {
   type    = map(string)
   default = {}

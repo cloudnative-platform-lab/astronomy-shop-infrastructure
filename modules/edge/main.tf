@@ -1,3 +1,12 @@
+resource "random_password" "origin_verification" {
+  length  = 32
+  special = false
+}
+
+locals {
+  origin_verification_header_value = var.origin_verification_header_value != "" ? var.origin_verification_header_value : random_password.origin_verification.result
+}
+
 resource "aws_wafv2_web_acl" "this" {
   name  = "${var.name}-${var.environment}-edge"
   scope = "CLOUDFRONT"
@@ -103,6 +112,11 @@ resource "aws_cloudfront_distribution" "this" {
   origin {
     domain_name = var.origin_domain_name
     origin_id   = "alb"
+
+    custom_header {
+      name  = var.origin_verification_header_name
+      value = local.origin_verification_header_value
+    }
 
     custom_origin_config {
       http_port              = 80

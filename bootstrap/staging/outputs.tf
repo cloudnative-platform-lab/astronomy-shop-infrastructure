@@ -28,6 +28,11 @@ output "cloudfront_distribution_id" { value = try(module.edge[0].cloudfront_dist
 output "cloudfront_certificate_arn" { value = module.certificates.certificate_arn }
 output "alb_certificate_arn" { value = module.alb_certificates.certificate_arn }
 output "cloudfront_hosted_zone_id" { value = try(module.edge[0].cloudfront_hosted_zone_id, null) }
+output "edge_origin_verification_header_name" { value = try(module.edge[0].origin_verification_header_name, null) }
+output "edge_origin_verification_header_value" {
+  value     = try(module.edge[0].origin_verification_header_value, null)
+  sensitive = true
+}
 output "route53_zone_id" { value = try(module.route53[0].zone_id, var.route53_zone_id) }
 output "route53_fqdn" { value = try(module.route53[0].fqdn, null) }
 output "cloudtrail_name" { value = module.governance.cloudtrail_name }
