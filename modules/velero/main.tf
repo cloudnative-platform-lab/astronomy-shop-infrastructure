@@ -88,7 +88,7 @@ resource "aws_iam_policy" "this" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
+    Statement = concat([
       {
         Effect = "Allow"
         Action = [
@@ -119,7 +119,17 @@ resource "aws_iam_policy" "this" {
         ]
         Resource = "*"
       }
-    ]
+      ], var.kms_key_arn == null ? [] : [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:DescribeKey",
+          "kms:GenerateDataKey"
+        ]
+        Resource = var.kms_key_arn
+      }
+    ])
   })
 
   tags = var.tags
