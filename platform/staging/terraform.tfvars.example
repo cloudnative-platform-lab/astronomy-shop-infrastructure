@@ -3,7 +3,8 @@ bootstrap_state_bucket = "replace-with-bootstrap-remote-state-output"
 bootstrap_state_key = "astronomy-shop/bootstrap/staging/terraform.tfstate"
 bootstrap_state_region = "ap-south-1"
 gitops_repository_ssh_private_key_path = "~/.ssh/argocd_astronomy_shop_gitops"
-alert_email = "platform-alerts@example.com"
+# Set a real, confirmed mailbox before enabling email notifications.
+alert_email = ""
 create_application_ingress = false
 application_hostname = "staging.example.com"
 alb_certificate_arn = ""

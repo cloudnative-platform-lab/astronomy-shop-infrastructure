@@ -38,7 +38,8 @@ alb_hosted_zone_id = "ZP97RAFLXTNZK"
 edge_origin_domain_name = "origin.staging.astronomy-shop.store"
 edge_manage_origin_dns = false
 cloudfront_certificate_arn = "arn:aws:acm:us-east-1:241766333730:certificate/c3604cac-f2ae-4dc3-97e0-6357989e60b9"
-alert_email = "platform-alerts@example.com"
+# Set a real, confirmed mailbox before enabling email notifications.
+alert_email = ""
 eks_endpoint_public_access_cidrs = ["0.0.0.0/0"] # Personal learning environment: allow access despite changing home ISP IPs.
 eks_admin_role_arns = []
 enable_ebs_csi_driver = true
