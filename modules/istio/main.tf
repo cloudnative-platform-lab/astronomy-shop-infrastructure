@@ -27,7 +27,7 @@ resource "helm_release" "istiod" {
 }
 
 resource "kubernetes_labels" "application_namespace" {
-  count       = var.enabled ? 1 : 0
+  count       = var.enabled && var.enable_application_namespace_injection ? 1 : 0
   api_version = "v1"
   kind        = "Namespace"
 

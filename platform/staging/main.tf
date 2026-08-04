@@ -55,9 +55,10 @@ module "kubernetes_security" {
 }
 
 module "istio" {
-  source                = "../../modules/istio"
-  enabled               = var.enable_istio
-  application_namespace = local.effective_app_namespace
+  source                                 = "../../modules/istio"
+  enabled                                = var.enable_istio
+  application_namespace                  = local.effective_app_namespace
+  enable_application_namespace_injection = var.enable_istio_sidecar_injection
 
   depends_on = [module.kubernetes_security]
 }

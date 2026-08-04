@@ -12,14 +12,19 @@ variable "application_namespace" {
   type = string
 }
 
+variable "enable_application_namespace_injection" {
+  type    = bool
+  default = false
+}
+
 variable "base_chart_version" {
   type    = string
-  default = "1.22.8"
+  default = "1.30.3"
 }
 
 variable "istiod_chart_version" {
   type    = string
-  default = "1.22.8"
+  default = "1.30.3"
 }
 
 variable "base_values" {

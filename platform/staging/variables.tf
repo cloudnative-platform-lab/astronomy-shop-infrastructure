@@ -57,6 +57,11 @@ variable "enable_istio" {
   type    = bool
   default = false
 }
+
+variable "enable_istio_sidecar_injection" {
+  type    = bool
+  default = false
+}
 variable "enable_kubernetes_security" {
   type    = bool
   default = true
