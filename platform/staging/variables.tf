@@ -53,6 +53,10 @@ variable "enable_argo_rollouts" {
   type    = bool
   default = true
 }
+variable "enable_istio" {
+  type    = bool
+  default = false
+}
 variable "enable_kubernetes_security" {
   type    = bool
   default = true

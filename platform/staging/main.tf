@@ -13,26 +13,26 @@ module "karpenter" {
 }
 
 module "ingress" {
-  count                      = var.enable_ingress ? 1 : 0
-  source                     = "../../modules/ingress"
-  name                       = local.project
-  environment                = local.environment
-  cluster_name               = data.terraform_remote_state.bootstrap.outputs.cluster_name
-  vpc_id                     = data.terraform_remote_state.bootstrap.outputs.vpc_id
-  oidc_provider_arn          = data.terraform_remote_state.bootstrap.outputs.oidc_provider_arn
-  route53_zone_arns          = var.route53_zone_arns
-  create_application_ingress = var.create_application_ingress
-  application_namespace      = local.effective_app_namespace
-  application_hostname       = var.application_hostname
-  application_service_name   = "frontend-proxy"
-  application_service_port   = 8080
-  alb_certificate_arn        = var.alb_certificate_arn != "" ? var.alb_certificate_arn : try(data.terraform_remote_state.bootstrap.outputs.alb_certificate_arn, "")
-  alb_waf_acl_arn            = var.alb_waf_acl_arn
+  count                                        = var.enable_ingress ? 1 : 0
+  source                                       = "../../modules/ingress"
+  name                                         = local.project
+  environment                                  = local.environment
+  cluster_name                                 = data.terraform_remote_state.bootstrap.outputs.cluster_name
+  vpc_id                                       = data.terraform_remote_state.bootstrap.outputs.vpc_id
+  oidc_provider_arn                            = data.terraform_remote_state.bootstrap.outputs.oidc_provider_arn
+  route53_zone_arns                            = var.route53_zone_arns
+  create_application_ingress                   = var.create_application_ingress
+  application_namespace                        = local.effective_app_namespace
+  application_hostname                         = var.application_hostname
+  application_service_name                     = "frontend-proxy"
+  application_service_port                     = 8080
+  alb_certificate_arn                          = var.alb_certificate_arn != "" ? var.alb_certificate_arn : try(data.terraform_remote_state.bootstrap.outputs.alb_certificate_arn, "")
+  alb_waf_acl_arn                              = var.alb_waf_acl_arn
   application_origin_verification_header_name  = try(data.terraform_remote_state.bootstrap.outputs.edge_origin_verification_header_name, "")
   application_origin_verification_header_value = try(data.terraform_remote_state.bootstrap.outputs.edge_origin_verification_header_value, "")
-  create_cluster_issuer      = var.create_cert_manager_cluster_issuer
-  cluster_issuer_email       = var.cert_manager_email != "" ? var.cert_manager_email : var.alert_email
-  tags                       = local.common_tags
+  create_cluster_issuer                        = var.create_cert_manager_cluster_issuer
+  cluster_issuer_email                         = var.cert_manager_email != "" ? var.cert_manager_email : var.alert_email
+  tags                                         = local.common_tags
 }
 
 module "argo_rollouts" {
@@ -54,6 +54,14 @@ module "kubernetes_security" {
   cosign_subject_regexp            = var.cosign_subject_regexp
 }
 
+module "istio" {
+  source                = "../../modules/istio"
+  enabled               = var.enable_istio
+  application_namespace = local.effective_app_namespace
+
+  depends_on = [module.kubernetes_security]
+}
+
 module "workload_foundation" {
   count                   = var.enable_workload_foundation ? 1 : 0
   source                  = "../../modules/workload-foundation"
@@ -72,22 +80,22 @@ module "workload_foundation" {
   ])
   app_storage_bucket_arn = try(data.terraform_remote_state.bootstrap.outputs.app_storage_bucket_arn, "")
   tags                   = local.common_tags
-  depends_on             = [module.kubernetes_security]
+  depends_on             = [module.kubernetes_security, module.istio]
 }
 
 module "gitops" {
-  count                   = var.enable_gitops ? 1 : 0
-  source                  = "../../modules/gitops"
-  name                    = local.project
-  environment             = local.environment
-  repository_url          = var.gitops_repository_url
+  count                      = var.enable_gitops ? 1 : 0
+  source                     = "../../modules/gitops"
+  name                       = local.project
+  environment                = local.environment
+  repository_url             = var.gitops_repository_url
   repository_ssh_private_key = var.gitops_repository_ssh_private_key_path != "" && fileexists(pathexpand(var.gitops_repository_ssh_private_key_path)) ? file(pathexpand(var.gitops_repository_ssh_private_key_path)) : null
-  root_application_path   = "argocd/appsets/${local.environment}"
-  target_revision         = "main"
-  install_argocd          = var.enable_gitops
-  create_root_application = var.create_gitops_root_application
-  tags                    = local.common_tags
-  depends_on              = [module.karpenter, module.argo_rollouts, module.observability, module.workload_foundation]
+  root_application_path      = "argocd/appsets/${local.environment}"
+  target_revision            = "main"
+  install_argocd             = var.enable_gitops
+  create_root_application    = var.create_gitops_root_application
+  tags                       = local.common_tags
+  depends_on                 = [module.karpenter, module.argo_rollouts, module.istio, module.observability, module.workload_foundation]
 }
 
 module "observability" {
@@ -101,8 +109,8 @@ module "observability" {
   enable_loki                    = var.enable_loki
   enable_opentelemetry_collector = var.enable_opentelemetry_collector
   enable_tempo                   = var.enable_tempo
-    enable_persistence             = var.enable_observability_persistence
-    tags                           = local.common_tags
+  enable_persistence             = var.enable_observability_persistence
+  tags                           = local.common_tags
 
   depends_on = [module.ingress]
 }
