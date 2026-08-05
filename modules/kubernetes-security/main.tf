@@ -207,6 +207,8 @@ resource "helm_release" "falco" {
   version          = var.falco_chart_version
   namespace        = var.falco_namespace
   create_namespace = true
+  wait             = true
+  timeout          = 900
   values           = var.falco_values
 }
 
