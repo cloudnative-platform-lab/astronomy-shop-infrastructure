@@ -73,6 +73,15 @@ module "eks" {
   })
 }
 
+resource "aws_vpc_security_group_ingress_rule" "cluster_to_istiod_webhook" {
+  security_group_id            = module.eks.node_security_group_id
+  referenced_security_group_id = module.eks.cluster_security_group_id
+  ip_protocol                  = "tcp"
+  from_port                    = 15017
+  to_port                      = 15017
+  description                  = "Cluster API to Istiod admission webhook"
+}
+
 data "aws_iam_policy_document" "pod_identity_assume_role" {
   statement {
     actions = [
