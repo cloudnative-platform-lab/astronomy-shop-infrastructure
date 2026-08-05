@@ -199,6 +199,19 @@ resource "kubernetes_network_policy_v1" "allow_https_egress" {
   depends_on = [kubernetes_namespace_v1.managed]
 }
 
+resource "kubernetes_priority_class_v1" "falco" {
+  count = var.enable_falco ? 1 : 0
+
+  metadata {
+    name = "falco-node-security"
+  }
+
+  value             = 900000000
+  global_default    = false
+  description       = "Prioritizes Falco node security monitoring over application workloads."
+  preemption_policy = "PreemptLowerPriority"
+}
+
 resource "helm_release" "falco" {
   count            = var.enable_falco ? 1 : 0
   name             = "falco"
@@ -209,6 +222,8 @@ resource "helm_release" "falco" {
   create_namespace = true
   wait             = false
   values           = var.falco_values
+
+  depends_on = [kubernetes_priority_class_v1.falco]
 }
 
 resource "helm_release" "kyverno" {
