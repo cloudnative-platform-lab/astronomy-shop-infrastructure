@@ -33,7 +33,7 @@ enable_velero = true
 enable_finops = true
 enable_kubecost = true
 enable_kyverno = true
-enable_falco = false
+enable_falco = true
 enable_signed_image_policy = false
 # Keep false for the first platform apply. Change to true only after Argo CD
 # has read-only access to the GitOps repository.

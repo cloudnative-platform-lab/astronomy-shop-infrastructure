@@ -209,5 +209,5 @@ variable "app_namespaces" {
 
 variable "enable_falco" {
   type    = bool
-  default = false
+  default = true
 }

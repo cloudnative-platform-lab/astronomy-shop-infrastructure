@@ -41,11 +41,16 @@ module "argo_rollouts" {
 }
 
 module "kubernetes_security" {
-  count                            = var.enable_kubernetes_security ? 1 : 0
-  source                           = "../../modules/kubernetes-security"
-  namespaces                       = length(var.app_namespaces) > 0 ? var.app_namespaces : local.app_namespaces
-  enable_kyverno                   = var.enable_kyverno
-  enable_falco                     = var.enable_falco
+  count          = var.enable_kubernetes_security ? 1 : 0
+  source         = "../../modules/kubernetes-security"
+  namespaces     = length(var.app_namespaces) > 0 ? var.app_namespaces : local.app_namespaces
+  enable_kyverno = var.enable_kyverno
+  enable_falco   = var.enable_falco
+  falco_values = [yamlencode({
+    driver = {
+      kind = "modern_ebpf"
+    }
+  })]
   kyverno_chart_version            = var.kyverno_chart_version
   kyverno_values                   = var.kyverno_values
   enable_signed_image_policy       = var.enable_signed_image_policy
