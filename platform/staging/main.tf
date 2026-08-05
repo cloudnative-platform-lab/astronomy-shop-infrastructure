@@ -70,7 +70,7 @@ module "kubernetes_security" {
         effect   = "NoExecute"
       }
     ]
-    priorityClassName = "falco-node-security"
+    podPriorityClassName = "falco-node-security"
   })]
   kyverno_chart_version            = var.kyverno_chart_version
   kyverno_values                   = var.kyverno_values
