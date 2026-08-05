@@ -50,6 +50,26 @@ module "kubernetes_security" {
     driver = {
       kind = "modern_ebpf"
     }
+    resources = {
+      requests = {
+        cpu    = "50m"
+        memory = "256Mi"
+      }
+      limits = {
+        cpu    = "500m"
+        memory = "512Mi"
+      }
+    }
+    tolerations = [
+      {
+        operator = "Exists"
+        effect   = "NoSchedule"
+      },
+      {
+        operator = "Exists"
+        effect   = "NoExecute"
+      }
+    ]
   })]
   kyverno_chart_version            = var.kyverno_chart_version
   kyverno_values                   = var.kyverno_values
