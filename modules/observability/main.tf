@@ -62,6 +62,42 @@ resource "kubernetes_service_account_v1" "alertmanager" {
   }
 }
 
+resource "kubernetes_secret_v1" "alertmanager_config" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  metadata {
+    name      = "alertmanager-sns-config"
+    namespace = "observability"
+  }
+
+  data = {
+    "alertmanager.yaml" = yamlencode({
+      global = {
+        resolve_timeout = "5m"
+      }
+      route = {
+        receiver        = "platform-sns"
+        group_by        = ["alertname", "namespace"]
+        group_wait      = "30s"
+        group_interval  = "5m"
+        repeat_interval = "4h"
+      }
+      receivers = [{
+        name = "platform-sns"
+        sns_configs = [{
+          topic_arn = aws_sns_topic.alerts.arn
+          subject   = "[${var.environment}] Astronomy Shop alert"
+          sigv4 = {
+            region = var.aws_region
+          }
+        }]
+      }]
+    })
+  }
+
+  type = "Opaque"
+}
+
 resource "aws_eks_pod_identity_association" "alertmanager" {
   count = local.enable_alertmanager_sns ? 1 : 0
 
@@ -168,28 +204,7 @@ resource "helm_release" "kube_prometheus_stack" {
       alertmanager = {
         alertmanagerSpec = {
           serviceAccountName = local.alertmanager_service_account_name
-        }
-        config = {
-          global = {
-            resolve_timeout = "5m"
-          }
-          route = {
-            receiver        = "platform-sns"
-            group_by        = ["alertname", "namespace"]
-            group_wait      = "30s"
-            group_interval  = "5m"
-            repeat_interval = "4h"
-          }
-          receivers = [{
-            name = "platform-sns"
-            sns_configs = [{
-              topic_arn = aws_sns_topic.alerts.arn
-              subject   = "[${var.environment}] Astronomy Shop alert"
-              sigv4 = {
-                region = var.aws_region
-              }
-            }]
-          }]
+          configSecret       = kubernetes_secret_v1.alertmanager_config[0].metadata[0].name
         }
       }
     })
@@ -197,6 +212,7 @@ resource "helm_release" "kube_prometheus_stack" {
 
   depends_on = [
     kubernetes_storage_class_v1.gp3,
+    kubernetes_secret_v1.alertmanager_config,
     aws_eks_pod_identity_association.alertmanager
   ]
 }

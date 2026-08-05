@@ -23,6 +23,7 @@ enable_gitops = true
 enable_observability = true
 enable_metrics_server = true
 enable_alertmanager = true
+enable_alertmanager_sns = true
 enable_loki = true
 enable_opentelemetry_collector = true
 enable_tempo = true
