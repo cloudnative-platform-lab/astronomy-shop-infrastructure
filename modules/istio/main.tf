@@ -11,6 +11,21 @@ resource "helm_release" "base" {
   values           = var.base_values
 }
 
+resource "helm_release" "cni" {
+  count            = var.enabled ? 1 : 0
+  name             = "istio-cni"
+  repository       = "https://istio-release.storage.googleapis.com/charts"
+  chart            = "cni"
+  version          = var.cni_chart_version
+  namespace        = var.namespace
+  create_namespace = true
+  wait             = true
+  timeout          = var.helm_timeout_seconds
+  values           = var.cni_values
+
+  depends_on = [helm_release.base]
+}
+
 resource "helm_release" "istiod" {
   count            = var.enabled ? 1 : 0
   name             = "istiod"
@@ -21,9 +36,15 @@ resource "helm_release" "istiod" {
   create_namespace = true
   wait             = true
   timeout          = var.helm_timeout_seconds
-  values           = var.istiod_values
+  values = concat(var.istiod_values, [yamlencode({
+    pilot = {
+      cni = {
+        enabled = true
+      }
+    }
+  })])
 
-  depends_on = [helm_release.base]
+  depends_on = [helm_release.cni]
 }
 
 resource "kubernetes_labels" "application_namespace" {

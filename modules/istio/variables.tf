@@ -27,7 +27,17 @@ variable "istiod_chart_version" {
   default = "1.30.3"
 }
 
+variable "cni_chart_version" {
+  type    = string
+  default = "1.30.3"
+}
+
 variable "base_values" {
+  type    = list(string)
+  default = []
+}
+
+variable "cni_values" {
   type    = list(string)
   default = []
 }
