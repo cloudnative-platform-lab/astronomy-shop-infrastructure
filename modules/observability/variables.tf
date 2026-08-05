@@ -1,6 +1,18 @@
 variable "name" { type = string }
 variable "environment" { type = string }
 variable "alert_email" { type = string }
+variable "cluster_name" {
+  type    = string
+  default = ""
+}
+variable "aws_region" {
+  type    = string
+  default = "ap-south-1"
+}
+variable "enable_alertmanager_sns" {
+  type    = bool
+  default = false
+}
 variable "enable_monitoring_stack" {
   type    = bool
   default = true

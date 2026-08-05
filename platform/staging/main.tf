@@ -104,6 +104,9 @@ module "observability" {
   name                           = local.project
   environment                    = local.environment
   alert_email                    = var.alert_email
+  cluster_name                   = data.terraform_remote_state.bootstrap.outputs.cluster_name
+  aws_region                     = var.aws_region
+  enable_alertmanager_sns        = var.enable_alertmanager_sns
   enable_monitoring_stack        = var.enable_observability
   enable_metrics_server          = var.enable_metrics_server
   enable_alertmanager            = var.enable_alertmanager

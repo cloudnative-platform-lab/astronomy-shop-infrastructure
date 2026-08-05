@@ -10,6 +10,69 @@ resource "aws_sns_topic_subscription" "email" {
   endpoint  = var.alert_email
 }
 
+locals {
+  enable_alertmanager_sns           = var.enable_alertmanager && var.enable_alertmanager_sns && var.alert_email != "" && var.cluster_name != ""
+  alertmanager_service_account_name = "alertmanager-sns"
+}
+
+data "aws_iam_policy_document" "alertmanager_assume_role" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  statement {
+    actions = ["sts:AssumeRole", "sts:TagSession"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "alertmanager_sns" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  statement {
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.alerts.arn]
+  }
+}
+
+resource "aws_iam_role" "alertmanager" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  name               = "${var.name}-${var.environment}-alertmanager"
+  assume_role_policy = data.aws_iam_policy_document.alertmanager_assume_role[0].json
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy" "alertmanager_sns" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  name   = "sns-publish"
+  role   = aws_iam_role.alertmanager[0].id
+  policy = data.aws_iam_policy_document.alertmanager_sns[0].json
+}
+
+resource "kubernetes_service_account_v1" "alertmanager" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  metadata {
+    name      = local.alertmanager_service_account_name
+    namespace = "observability"
+  }
+}
+
+resource "aws_eks_pod_identity_association" "alertmanager" {
+  count = local.enable_alertmanager_sns ? 1 : 0
+
+  cluster_name    = var.cluster_name
+  namespace       = kubernetes_service_account_v1.alertmanager[0].metadata[0].namespace
+  service_account = kubernetes_service_account_v1.alertmanager[0].metadata[0].name
+  role_arn        = aws_iam_role.alertmanager[0].arn
+
+  depends_on = [aws_iam_role_policy.alertmanager_sns]
+}
+
 resource "kubernetes_storage_class_v1" "gp3" {
   count = var.enable_persistence ? 1 : 0
 
@@ -67,7 +130,7 @@ resource "helm_release" "kube_prometheus_stack" {
   wait             = false
   timeout          = 900
 
-  values = [
+  values = concat([
     yamlencode({
       alertmanager = {
         enabled = var.enable_alertmanager
@@ -100,9 +163,42 @@ resource "helm_release" "kube_prometheus_stack" {
         }
       }
     })
-  ]
+    ], local.enable_alertmanager_sns ? [
+    yamlencode({
+      alertmanager = {
+        alertmanagerSpec = {
+          serviceAccountName = local.alertmanager_service_account_name
+        }
+        config = {
+          global = {
+            resolve_timeout = "5m"
+          }
+          route = {
+            receiver        = "platform-sns"
+            group_by        = ["alertname", "namespace"]
+            group_wait      = "30s"
+            group_interval  = "5m"
+            repeat_interval = "4h"
+          }
+          receivers = [{
+            name = "platform-sns"
+            sns_configs = [{
+              topic_arn = aws_sns_topic.alerts.arn
+              subject   = "[${var.environment}] Astronomy Shop alert"
+              sigv4 = {
+                region = var.aws_region
+              }
+            }]
+          }]
+        }
+      }
+    })
+  ] : [])
 
-  depends_on = [kubernetes_storage_class_v1.gp3]
+  depends_on = [
+    kubernetes_storage_class_v1.gp3,
+    aws_eks_pod_identity_association.alertmanager
+  ]
 }
 
 resource "helm_release" "loki" {

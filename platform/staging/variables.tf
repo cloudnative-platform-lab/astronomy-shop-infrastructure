@@ -114,6 +114,10 @@ variable "enable_alertmanager" {
   type    = bool
   default = true
 }
+variable "enable_alertmanager_sns" {
+  type    = bool
+  default = true
+}
 variable "enable_loki" {
   type    = bool
   default = true
