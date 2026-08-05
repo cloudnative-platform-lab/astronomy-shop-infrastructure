@@ -206,6 +206,10 @@ resource "helm_release" "kube_prometheus_stack" {
           serviceAccountName = local.alertmanager_service_account_name
           configSecret       = kubernetes_secret_v1.alertmanager_config[0].metadata[0].name
         }
+        serviceAccount = {
+          create = false
+          name   = local.alertmanager_service_account_name
+        }
       }
     })
   ] : [])
