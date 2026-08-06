@@ -252,7 +252,7 @@ resource "kubernetes_manifest" "require_signed_images" {
       }
     }
     spec = {
-      validationFailureAction = "Enforce"
+      validationFailureAction = var.signed_image_validation_action
       background              = false
       failurePolicy           = "Fail"
       webhookTimeoutSeconds   = 30

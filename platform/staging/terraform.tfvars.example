@@ -34,7 +34,8 @@ enable_finops = true
 enable_kubecost = true
 enable_kyverno = true
 enable_falco = true
-enable_signed_image_policy = false
+enable_signed_image_policy = true
+signed_image_validation_action = "Audit"
 # Keep false for the first platform apply. Change to true only after Argo CD
 # has read-only access to the GitOps repository.
 create_gitops_root_application = false

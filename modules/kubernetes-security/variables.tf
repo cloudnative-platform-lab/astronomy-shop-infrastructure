@@ -45,6 +45,16 @@ variable "enable_signed_image_policy" {
   default = false
 }
 
+variable "signed_image_validation_action" {
+  type    = string
+  default = "Audit"
+
+  validation {
+    condition     = contains(["Audit", "Enforce"], var.signed_image_validation_action)
+    error_message = "signed_image_validation_action must be Audit or Enforce."
+  }
+}
+
 variable "signed_image_namespaces" {
   type    = list(string)
   default = []

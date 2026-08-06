@@ -75,6 +75,7 @@ module "kubernetes_security" {
   kyverno_chart_version            = var.kyverno_chart_version
   kyverno_values                   = var.kyverno_values
   enable_signed_image_policy       = var.enable_signed_image_policy
+  signed_image_validation_action   = var.signed_image_validation_action
   signed_image_namespaces          = [local.effective_app_namespace]
   signed_image_repository_patterns = length(var.signed_image_repository_patterns) > 0 ? var.signed_image_repository_patterns : ["*.dkr.ecr.${var.aws_region}.amazonaws.com/${local.project}/*"]
   cosign_subject_regexp            = var.cosign_subject_regexp

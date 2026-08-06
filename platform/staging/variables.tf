@@ -168,7 +168,12 @@ variable "kyverno_values" {
 }
 variable "enable_signed_image_policy" {
   type    = bool
-  default = false
+  default = true
+}
+
+variable "signed_image_validation_action" {
+  type    = string
+  default = "Audit"
 }
 variable "signed_image_repository_patterns" {
   type    = list(string)
